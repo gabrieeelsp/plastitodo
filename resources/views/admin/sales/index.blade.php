@@ -42,7 +42,8 @@
                     <th>Fecha</th>
                     <th>Cliente</th>
                     <th>Usuario</th>
-                    <th width="10px">Total</th>
+                    <th width="10px">Estado</th>
+                    <th >Total</th>
                     <th colspan="1">&nbsp;</th>
                   </tr>
                 </thead>
@@ -52,14 +53,28 @@
                   <tr>
                     <td>{{ $sale->id }}</td>
                     <td>{{ Carbon\Carbon::parse($sale->created_at)->format('d-m-Y H:i') }}</td>
-                    <td>{{ $sale->client->name }}</td>
+                    @if($sale->client != null)
+                      <td>{{ $sale->client->name }}</td>
+                    @else
+                      <td>Ciente Estándar</td>
+                    @endif
                     <td>{{ $sale->user->name }}</td>
-                    <td style="text-align: right;">{{ number_format($sale->getTotal(), 2)}}</td>
+                    @if($sale->status == 'EDITANDO')
+                      <td><span class="badge bg-warning">{{ $sale->status }}</span></td>
+                    @else
+                      <td><span class="badge bg-primary">{{ $sale->status }}</span></td>
+                    @endif
+                    <td style="text-align: right;">$ {{ number_format($sale->getTotal(), 2)}}</td>
                     <td width="10px">
+                      @if( Auth::user()->id = $sale->user->id & $sale->status == 'EDITANDO')
+                        <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-sm btn-outline-primary mr-2">Editar</a>
+                      @else
+
                       <!-- Button trigger modal -->
                       <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#editarModalN{{ $count }}">
                         Ver
                       </button>
+                      @endif
                     </td>
 
 
@@ -103,7 +118,11 @@
             <div class="row">
               <label for="cliente" class="col-sm-2 col-form-label text-sm-right">Cliente</label>
               <div class="col-sm-10">
+                  @if($sale->client != null)
                   <input type="text" class="form-control form-disable col-sm-10" value="{{ $sale->client->name }}" disabled>
+                  @else
+                  <input type="text" class="form-control form-disable col-sm-10" value="Cliente Estándar" disabled>
+                  @endif
               </div>
             </div>
             <div class="row">

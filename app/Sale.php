@@ -31,7 +31,7 @@ class Sale extends Model
     return round($total, 2);
   }
 
-  public function getSaleProduct($saleproducto_id)
+  public function getSaleItem($saleproducto_id)
   {
     foreach($this->saleitems as $item){
       if( $item->saleproduct->id == $saleproducto_id){

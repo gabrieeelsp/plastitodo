@@ -42,10 +42,84 @@ class SaleitemController extends Controller
 
       $sale = Sale::find($sale_id);
 
+      if($request->has('saleproduct_barcode')){
+        $saleproduct = Saleproduct::where('barcode', $request->get('saleproduct_barcode'))->first();
+        if($saleproduct != null){
+
+
+          //Store por barcode BEGIN --------------------------------------------------------------
+
+
+          //verifico el stock
+          $stockVentasEditando = 0;
+          $salesEDITANDO = Sale::where('status', 'EDITANDO')->get();
+
+          foreach($salesEDITANDO as $saleEDITANDO){
+
+            foreach($saleEDITANDO->saleitems as $item){
+              //pregunto el item(Saleitem) refiere al producto stock que estoy ingresando
+              if($item->saleproduct->stockproduct->id == $saleproduct->stockproduct->id){
+                //entonces acumulo el stock, considerando la relacion_venta_stock
+                $stockVentasEditando = $stockVentasEditando + $item->cantidad * $item->saleproduct->rel_venta_stock;
+              }
+            }
+
+
+          }
+          $stock_disponible = $saleproduct->getStock() - $stockVentasEditando / $saleproduct->rel_venta_stock;
+
+          if($stock_disponible < 1){
+            //Stock no es suficiente
+            return redirect()->route('sales.edit', $sale_id);
+          }
+          //dd('Stock disponible: '. $stock_disponible);
+
+
+
+
+          $precio = 0;
+          if($sale->client != null && $sale->client->tipo == 'Mayorista'){
+            //Venta registrada a un cliente, ver si es mayorista o minorista
+            $precio = $saleproduct->getPrecioMay();
+          }else{
+            //tomo el precio Minorista
+            $precio = $saleproduct->getPrecioMin();
+          }
+
+          //verifico que el producto no este ya en la misma Venta
+          $saleitem = $sale->getSaleItem($saleproduct->id);
+          if( $saleitem != null){
+            $saleitem ->cantidad = $saleitem->cantidad + 1;
+            $saleitem->update();
+
+            //voy a editar
+            return redirect()->route('sales.edit', ['sale_id' => $sale_id, 'id_edited' => $saleitem->id]);
+
+          }
+
+          $saleitem = Saleitem::create(['sale_id' => $sale_id, 'saleproduct_id' => $saleproduct->id, 'cantidad' => 1, 'precio' => $precio, 'descuento' => 0]);
+
+
+          //voy a editar
+          return redirect()->route('sales.edit', $sale_id);
+
+          //Store por barcode END --------------------------------------------------------------
+
+
+
+
+        }else{
+          //No se encontro el Saleproduct segun el barcode
+          return redirect()->route('sales.edit', $sale_id);
+        }
+      }
+
+
+
       $saleproduct = Saleproduct::find($request->get('saleproduct_id'));
 
       //verifico que el producto no este ya en la misma Venta
-      if($sale->getSaleProduct($request->get('saleproduct_id')) != null){
+      if($sale->getSaleItem($request->get('saleproduct_id')) != null){
         return redirect()->route('sales.edit', $sale_id);
       }
 

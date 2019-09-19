@@ -40,29 +40,70 @@ class SaleController extends Controller
 
       }
 
-        $query = trim($request->get('searchText'));
+      $query = trim($request->get('searchText'));
 
-        $val = explode(' ', $query );
-        $atr = [];
-        foreach ($val as $q) {
-          array_push($atr, ['name', 'LIKE', '%'.$q.'%'] );
-        };
+      $val = explode(' ', $query );
+      $atr = [];
+      foreach ($val as $q) {
+        array_push($atr, ['name', 'LIKE', '%'.$q.'%'] );
+      };
 
-        if($request->get('daterange') != null)
-        {
+
+
+      if($request->get('searchText') != '')
+      {
+        if($request->get('daterange') != null){
+          if($from == $to){
+            //*searchText => true; dateRange => true; $from == $to => true
+            $sales = Sale::orderBy('id', 'DESC')
+                ->whereHas('client', function ($query2) use ($atr) {
+                $query2->where($atr);
+                })
+                ->whereDate('created_at', $from)
+                ->paginate(10);
+
+          }else{
+            //*searchText => true; dateRange => true; $from == $to => false
+            $sales = Sale::orderBy('id', 'DESC')
+                ->whereHas('client', function ($query2) use ($atr) {
+                $query2->where($atr);
+                })
+                ->whereBetween('created_at', [$from, $to])
+                ->paginate(10);
+
+          }
+        }else{
+          //*searchText => true; dateRange => false; $from == $to => false
           $sales = Sale::orderBy('id', 'DESC')
               ->whereHas('client', function ($query2) use ($atr) {
-              $query2->where($atr);
-              })
-              ->whereBetween('created_at', [$from, $to])
-              ->paginate(10);
-        }else {
-          $sales = Sale::orderBy('id', 'DESC')
-              ->whereHas('client', function ($query2) use ($atr) {
-              $query2->where($atr);
+                $query2->where($atr);
               })
               ->paginate(10);
         }
+      }else{
+        if($request->get('daterange') != null){
+          if($from == $to){
+            //*searchText => false; dateRange => true; $from == $to => true
+            $sales = Sale::orderBy('id', 'DESC')
+                ->whereDate('created_at', $from)
+                ->paginate(10);
+          }else{
+            //*searchText => false; dateRange => true; $from == $to => false
+            $sales = Sale::orderBy('id', 'DESC')
+                ->whereBetween('created_at', [$from, $to])
+                ->paginate(10);
+          }
+
+        }else{
+          //*searchText => false; dateRange => false; $from == $to => false
+          $sales = Sale::orderBy('id', 'DESC')
+            ->paginate(10);
+        }
+      }
+
+      
+
+
 
           return view('admin.sales.index', ['sales' => $sales, 'searchText' => $query, 'daterange' => $request->get('daterange')]);
     }
@@ -126,7 +167,11 @@ class SaleController extends Controller
 
       //$saleproducts = Saleproduct::orderBy('name', 'ASC')->pluck('name', 'id');
 
-      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited')]);
+      $sales_user = Sale::where('user_id', auth()->user()->id)
+        ->where('status', 'EDITANDO')
+        ->get();
+
+      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited'), 'sales_user' => $sales_user]);
     }
 
     /**
@@ -149,7 +194,16 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
-        //
+      Sale::find($id)->delete();
+
+      $sale_last = Sale::where('user_id', auth()->user()->id)
+        ->where('status', 'EDITANDO')
+        ->first();
+      if($sale_last != null){
+        return redirect()->route('sales.edit', $sale_last->id);
+      }
+
+      return redirect()->route('sales.index');
     }
 
     public function search(Request $request)
@@ -180,7 +234,7 @@ class SaleController extends Controller
               '<td>'.$product->name.'</td>'.
               '<td>'.$precio.'</td>'.
               '<td>'.$product->getStock().'</td>'.
-              '<td><button class="btn btn-sm btn-primary" onclick="select('.$product->id.')" data-dismiss="modal" >Seleccionar</button></td>'.
+              '<td><button class="btn btn-sm btn-success" onclick="select('.$product->id.')" data-dismiss="modal" >Seleccionar</button></td>'.
               '</tr>';
             }
             return Response($output);

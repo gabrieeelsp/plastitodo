@@ -16,15 +16,50 @@
       <div class="row pt-3">
         <div class="col-9">
           <div class="card">
-            <div class="card-header">
-              <h3 class="card-title" >Editar Venta</h3>
+            <div class="card-header d-flex justify-content-end">
+              <h3 class="card-title flex-fill" >Editar Venta</h3>
+
+              @foreach($sales_user as $sale_user)
+                @if($sale_user->client != null)
+                  @if($sale_user->id == $sale->id)
+                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-success mr-2">{{ $sale_user->client->name }}</a>
+                  @else
+                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-outline-success mr-2">{{ $sale_user->client->name }}</a>
+                  @endif
+                @else
+                  @if($sale_user->id == $sale->id)
+                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-primary mr-2">Cliente Estándar</a>
+                  @else
+                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-outline-primary mr-2">Cliente Estándar</a>
+                  @endif
+                @endif
+              @endforeach
+
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              {!! Form::open(['route' => ['sales.edit', $sale->id], 'class' => 'form-inline d-flex']) !!}
+              <div class="row">
+                <div class="col-sm-3">
+                  {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
 
-                @include('admin.sales.partials.formsaleitem')
-              {!! Form::close() !!}
+                    <input id="saleproduct_barcode" name="saleproduct_barcode" type="text" class="form-control" >
+
+                  {!! Form::close() !!}
+                </div>
+
+                <div class="col-sm-1 d-flex align-items-center">
+
+                    <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#selectSaleProductModal"> &nbsp; &nbsp;<i class="fas fa-cart-plus"></i> &nbsp; &nbsp; </button>
+
+              </div>
+
+
+
+              </div>
+
+
+
+
               <table class="table table-striped table-hover table-bordered mt-3">
                 <thead>
                   <tr>
@@ -72,6 +107,33 @@
                   @endforeach
                 </tbody>
               </table>
+
+
+              <div class="row">
+                <div class="col-12 d-flex justify-content-end mt-3">
+
+                  @if($sale->client != null)
+
+                    {{ Form::open(['route' => ['sales.destroy', $sale->id], 'method' => 'DELETE']) }}
+                    <button class="btn btn-sm btn-primary mr-3">Finalizar   </i></button>
+                    {{ Form::close() }}
+                  @endif
+
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal" data-target="#medotoPagoModal">
+                    Pagar
+                  </button>
+
+
+                    {{ Form::open(['route' => ['sales.destroy', $sale->id], 'method' => 'DELETE']) }}
+                    <button class="btn btn-sm btn-danger">Cancelar   <i class="far fa-trash-alt"></i></button>
+                    {{ Form::close() }}
+                </div>
+
+              </div>
+
+
+
 
 
             </div>
@@ -122,6 +184,8 @@
 
 
 
+
+
         </div>
 
       </div>
@@ -136,8 +200,8 @@
 <div class="modal fade in" id="selectSaleProductModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog  modal-dialog-max-width" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+      <div class="modal-header bg-primary">
+        <h5 class="modal-title" id="exampleModalLabel">Seleccionar un Producto</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -150,8 +214,8 @@
         </div>
         <table class="table table-bordered table-hover">
           <thead>
-            <tr>
-              <th>ID</th>
+            <tr class="bg-primary">
+              <th >ID</th>
               <th>Product Name</th>
               <th>Precio</th>
               <th>Stock</th>
@@ -178,8 +242,9 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
       <div class="modal-body">
-        {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
+
 
         {{ Form::hidden('sale_id', $sale->id) }}
         {{ Form::hidden('saleproduct_id', 0, ['id' => 'saleproduct_id']) }}
@@ -187,13 +252,13 @@
             <label for="cantidad">Cantidad</label>
             <input type="number" class="form-control text-right" step="any" name="cantidad" id="cantidad" value="1" >
           </div>
-        {!! Form::close() !!}
+
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="submit" class="btn btn-primary">Enviar</button>
       </div>
+      {!! Form::close() !!}
     </div>
   </div>
 </div>
@@ -294,6 +359,34 @@
 
 <!-- {{ $count = $count + 1 }} -->
 @endforeach
+
+
+
+<!--   Metodo de Pago Modal BEGIN ------------------>
+
+<div class="modal fade" id="medotoPagoModal" tabindex="-1" role="dialog" aria-labelledby="medotoPagoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Métodos de Pago</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!--   Metodo de Pago Modal END ------------------>
 
 
 

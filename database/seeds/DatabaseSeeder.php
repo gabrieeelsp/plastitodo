@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(ClientsTableSeeder ::class);
 
-        $this->call(SalesTableSeeder ::class);
+        //$this->call(SalesTableSeeder ::class);
 
-        $this->call(SaleitemsTableSeeder ::class);
+        //$this->call(SaleitemsTableSeeder ::class);
     }
 }

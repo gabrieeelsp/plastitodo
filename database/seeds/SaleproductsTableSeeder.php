@@ -19,6 +19,7 @@ class SaleproductsTableSeeder extends Seeder
         'porc_min' => 40,
         'cant_may' => 100,
         'porc_may' => 15,
+        'barcode' => '1234567891234',
       ]);
 
       App\Saleproduct::create([

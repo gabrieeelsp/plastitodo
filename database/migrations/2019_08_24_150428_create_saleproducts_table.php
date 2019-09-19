@@ -23,6 +23,8 @@ class CreateSaleproductsTable extends Migration
           $table->string('name', 128);
           $table->string('slug', 128)->unique();
 
+          $table->string('barcode')->nullable();
+
           $table->decimal('rel_venta_stock', 8, 4)->default(1);
 
           $table->decimal('porc_min', 8, 4)->default(40);
