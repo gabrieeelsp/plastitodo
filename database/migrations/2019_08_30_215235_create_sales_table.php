@@ -20,7 +20,11 @@ class CreateSalesTable extends Migration
 
             $table->dateTime('created_at');
 
-            $table->enum('status', ['EDITANDO','FINALIZADA']);
+            $table->decimal('total', 10, 4)->default(0);
+
+            $table->decimal('saldo', 10, 4)->default(0);
+
+            $table->enum('status', ['EDITANDO','FINALIZADA','COBRANDO']);
 
             //$table->timestamps();
 

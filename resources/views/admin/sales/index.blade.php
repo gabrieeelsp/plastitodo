@@ -162,11 +162,9 @@
                 <th width="10px">Precio</th>
                 <th width="10px">Cantidad</th>
                 <th width="10px">SubTotal</th>
-
               </tr>
             </thead>
             <tbody>
-
               @foreach($sale->saleitems as $item)
               <tr>
                 <td>{{ $item->saleproduct->id }}</td>
@@ -174,18 +172,10 @@
                 <td width="10px" style="text-align: right;">{{ $item->precio }}</td>
                 <td width="10px" style="text-align: right;">{{ $item->cantidad }}</td>
                 <td width="10px" style="text-align: right;"><b>{{ number_format($item->getSubTotal(), 4)  }}</b></td>
-
-
-
-
               </tr>
-
               @endforeach
             </tbody>
           </table>
-
-
-
 
       </div>
       <div class="modal-footer">

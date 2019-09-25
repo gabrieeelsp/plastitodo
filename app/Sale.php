@@ -22,11 +22,34 @@ class Sale extends Model
     return $this->hasMany(Saleitem::class);
   }
 
+  public function payments()
+  {
+    return $this->hasMany(Payment::class);
+  }
+
   public function getTotal()
   {
     $total = 0;
     foreach ($this->saleitems as $item) {
       $total = $total + $item->getSubTotal();
+    }
+    return round($total, 2);
+  }
+
+  public function getTotalConRecargo()
+  {
+    $total = $this->getTotal();
+    foreach ($this->payments as $item) {
+      $total = $total + $item->recargo;
+    }
+    return round($total, 2);
+  }
+
+  public function getTotalPayments()
+  {
+    $total = 0;
+    foreach ($this->payments as $item) {
+      $total = $total + $item->valor;
     }
     return round($total, 2);
   }

@@ -19,6 +19,8 @@ class CreateClientsTable extends Migration
           $table->string('name', 128);
           $table->string('slug', 128)->unique();
 
+          $table->decimal('saldo', 10, 4)->default(0);
+
           $table->enum('tipo', ['Minorista','Mayorista']);
 
           $table->string('direccion', 128)->nullable();

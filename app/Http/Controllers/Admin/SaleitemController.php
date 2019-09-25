@@ -85,7 +85,7 @@ class SaleitemController extends Controller
             //tomo el precio Minorista
             $precio = $saleproduct->getPrecioMin();
           }
-
+          
           //verifico que el producto no este ya en la misma Venta
           $saleitem = $sale->getSaleItem($saleproduct->id);
           if( $saleitem != null){
@@ -98,6 +98,18 @@ class SaleitemController extends Controller
           }
 
           $saleitem = Saleitem::create(['sale_id' => $sale_id, 'saleproduct_id' => $saleproduct->id, 'cantidad' => 1, 'precio' => $precio, 'descuento' => 0]);
+
+
+          //Actualizo el total
+          $sale->total = $sale->getTotal();
+          $sale->update();
+
+          //Actualizo el payment
+          $payment_efectivo = $sale->payments->first();
+
+          $payment_efectivo->valor = Sale::find($sale->id)->getTotal();
+
+          $payment_efectivo->update();
 
 
           //voy a editar
@@ -160,6 +172,15 @@ class SaleitemController extends Controller
       }
       $saleitem = Saleitem::create($request->all() + ['sale_id' => $sale_id, 'precio' => $precio, 'descuento' => 0]);
 
+
+      //Actualizo el total
+      $sale->total = $sale->getTotal();
+      $sale->update();
+      //Actualizo el payment
+      $payment_efectivo = $sale->payments->first();
+
+      $payment_efectivo->valor = Sale::find($sale->id)->getTotal();
+      $payment_efectivo->update();
 
       //voy a editar
       return redirect()->route('sales.edit', $sale_id);
@@ -238,6 +259,18 @@ class SaleitemController extends Controller
 
         $saleitem->update();
 
+        //Actualizo el total
+        $sale = Sale::find($sale_id);
+        $sale->total = $sale->getTotal();
+        $sale->update();
+
+        //Actualizo el payment
+        $payment_efectivo = Sale::find($sale_id)->payments->first();
+
+        $payment_efectivo->valor = Sale::find($sale_id)->getTotal();
+        //dd($payment_efectivo->valor);
+        $payment_efectivo->save();
+
         return redirect()->route('sales.edit', ['sale_id' => $sale_id, 'id_edited' => $id]);
     }
 
@@ -250,6 +283,16 @@ class SaleitemController extends Controller
     public function destroy($sale_id, $id)
     {
       Saleitem::find($id)->delete();
+
+      //Actualizo el total
+      $sale = Sale::find($sale_id);
+      $sale->total = $sale->getTotal();
+
+      //Actualizo el payment
+      $payment_efectivo = Sale::find($sale_id)->payments->first();
+
+      $payment_efectivo->valor = Sale::find($sale_id)->getTotal();
+      $payment_efectivo->update();
 
       return back()->with('info', 'Eliminado correctamente.');
     }

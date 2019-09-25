@@ -121,5 +121,45 @@ class SaleproductsTableSeeder extends Seeder
         'cant_may' => 100,
         'porc_may' => 15,
       ]);
+
+      App\Saleproduct::create([
+        'name' => 'Dulce de Leche EUREKA 10,00Kg UNIDAD',
+        'slug' => 'dulce-de-leche-eureka-10-00kg-unidad',
+        'stockproduct_id' => '9',
+        'rel_venta_stock' => 1,
+        'porc_min' => 20,
+        'cant_may' => 100,
+        'porc_may' => 15,
+      ]);
+
+      App\Saleproduct::create([
+        'name' => 'Dulce de Leche EUREKA 1,00Kg AL PESO',
+        'slug' => 'dulce-de-leche-eureka-1-00kg-al-peso',
+        'stockproduct_id' => '9',
+        'rel_venta_stock' => 0.1,
+        'porc_min' => 50,
+        'cant_may' => 100,
+        'porc_may' => 35,
+      ]);
+
+      App\Saleproduct::create([
+        'name' => 'Bolsa de Polipropileno 10x15 UNIDAD',
+        'slug' => 'bolsa-de-polipropileno-10x15-unidad',
+        'stockproduct_id' => '10',
+        'rel_venta_stock' => 1,
+        'porc_min' => 150,
+        'cant_may' => 100,
+        'porc_may' => 75,
+      ]);
+
+      App\Saleproduct::create([
+        'name' => 'Bolsa de Polipropileno 10x15 PAQ x100',
+        'slug' => 'bolsa-de-polipropileno-10x15-paq-x100',
+        'stockproduct_id' => '10',
+        'rel_venta_stock' => 100,
+        'porc_min' => 40,
+        'cant_may' => 100,
+        'porc_may' => 18,
+      ]);
     }
 }

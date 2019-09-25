@@ -11,6 +11,9 @@ use App\Saleproduct;
 
 use \Cache;
 use App\Client;
+use App\Paymentmethod;
+use App\Payment;
+use Carbon\Carbon;
 
 class SaleController extends Controller
 {
@@ -101,7 +104,7 @@ class SaleController extends Controller
         }
       }
 
-      
+
 
 
 
@@ -118,16 +121,31 @@ class SaleController extends Controller
         //creo una nueva ventas
         $sale = new Sale();
         //asigno created_at, tengo que actualizar este valor cada vez que realizo una operacion con una venta para ver si paso el tiempo para cancelarla
-        $sale->created_at = date("Y-m-d H:i:s");
+        $sale->created_at = date("Y-m-d H:i:s.v");
+
+        //dd(Carbon::now());
+
         //asigno el usuario loggeado
         $sale->user_id = auth()->user()->id;
+
+        $sale->total = 0;
+
+
 
         //$sale->client_id = Client::find(1)->id;
 
         //guardo la venta en BD
         $sale->save();
 
+        $payment = new Payment();
+        $payment->paymentmethod_id = 1;
+        $payment->sale_id = $sale->id;
+        $payment->valor = 0;
+        $payment->created_at = date("Y-m-d H:i:s");
 
+        $payment->save();
+
+        $sale = Sale::find($sale->id);
 
         //voy a editar
         return redirect()->route('sales.edit', $sale->id);
@@ -171,7 +189,9 @@ class SaleController extends Controller
         ->where('status', 'EDITANDO')
         ->get();
 
-      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited'), 'sales_user' => $sales_user]);
+      $paymentmethods = Paymentmethod::orderBy('name', 'ASC')->get();
+
+      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited'), 'sales_user' => $sales_user, 'paymentmethods' => $paymentmethods]);
     }
 
     /**
@@ -287,8 +307,59 @@ class SaleController extends Controller
 
         $sale->client_id = $request->get('client_id');
 
+        $payment_efectivo = $sale->payments->first();
+
+        $payment_efectivo->client_id = $request->get('client_id');
+
+        $payment_efectivo->update();
+
         $sale->update();
 
         return redirect()->route('sales.edit', $sale->id);
+    }
+
+    public function confirm_payment_efectivo(Request $request, $id)
+    {
+        $sale = Sale::find($id);
+
+        $sale->status = 'FINALIZADA';
+
+        //Actualizo el stock de cada producto
+        foreach($sale->saleitems as $item){
+          $stockproduct = $item->saleproduct->stockproduct;
+
+          $stockproduct->stock = $stockproduct->stock - ($item->cantidad * $item->saleproduct->rel_venta_stock);
+
+          $stockproduct->update();
+        }
+
+
+        $sale->client->saldo = $sale->client->saldo + $sale->getTotal();
+
+
+        $sale->saldo = $sale->client->saldo;
+
+        $sale->total = $sale->getTotal();
+
+        $sale->update();
+
+
+        //Actualizo l fecha y hora y saldo del payments
+        $payment_efectivo = $sale->payments->first();
+        $sale->client->saldo = $sale->client->saldo - $payment_efectivo->valor;
+        $payment_efectivo->created_at = date("Y-m-d H:i:s.v");
+
+        $payment_efectivo->saldo = $sale->client->saldo;
+
+        $payment_efectivo->update();
+
+        $sale->client->update();
+
+
+
+
+
+
+        return redirect()->route('sales.index');
     }
 }

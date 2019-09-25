@@ -74,5 +74,21 @@ class StockproductsTableSeeder extends Seeder
         'costo' => 35,
         'stock' => 100
       ]);
+
+      App\Stockproduct::create([
+        'name' => 'Dulce de Leche EUREKA 10,00Kg UNIDAD',
+        'slug' => 'dulce-de-leche-eureka-10-00kg-unidad',
+        'category_id' => '3',
+        'costo' => 830,
+        'stock' => 20
+      ]);
+
+      App\Stockproduct::create([
+        'name' => 'Bolsa de Polipropileno 10x15 UNIDAD',
+        'slug' => 'bolsa-de-polipropileno-10x15-unidad',
+        'category_id' => '4',
+        'costo' => 0.15,
+        'stock' => 20000
+      ]);
     }
 }

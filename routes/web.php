@@ -34,6 +34,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 //Admin
 //
+Route::resource('payments', 'Admin\PaymentController');
 Route::resource('rubros', 'Admin\RubroController');
 Route::resource('categories', 'Admin\CategoryController');
 
@@ -44,13 +45,29 @@ Route::resource('clients', 'Admin\ClientController');
 
 //-- SALE BEGIN ---------------------------------
   Route::post('sales/{id}/update_client', [
-    'uses' => 'Admin\SaleController@update_client',
+    'uses' => 'Admin\SaleControllera@update_client',
     'as' => 'sales.update_client'
   ]);
-  Route::get('sales_search_client','Admin\SaleController@search_client');
-  Route::get('sales_search_item','Admin\SaleController@search');
-  Route::resource('sales', 'Admin\SaleController');
-  Route::resource('sales.saleitems', 'Admin\SaleitemController');
+  Route::post('sales/{id}/confirm_payment_multiple', [
+    'uses' => 'Admin\SaleControllera@confirm_payment_multiple',
+    'as' => 'sales.confirm_payment_multiple'
+  ]);
+  Route::put('sales/{id}/confirm_payment_efectivo', [
+    'uses' => 'Admin\SaleControllera@confirm_payment_efectivo',
+    'as' => 'sales.confirm_payment_efectivo'
+  ]);
+  Route::post('sales/{id}/set_multipagos', [
+    'uses' => 'Admin\SaleControllera@set_multipagos',
+    'as' => 'sales.set_multipagos'
+  ]);
+  Route::post('sales/{id}/cancel_multipagos', [
+    'uses' => 'Admin\SaleControllera@cancel_multipagos',
+    'as' => 'sales.cancel_multipagos'
+  ]);
+  Route::get('sales_search_client','Admin\SaleControllera@search_client');
+  Route::get('sales_search_item','Admin\SaleControllera@search');
+  Route::resource('sales', 'Admin\SaleControllera');
+  Route::resource('sales.saleitems', 'Admin\SaleitemControllera');
 //-- SALE END ---------------------------------
 
 //-- STOCK PRODUCT BEGIN ---------------------------------

@@ -89,6 +89,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 <!-- AdminLTE App -->
 <script src="/{{ env('URL_REMOTE', '') }}dist/js/adminlte.min.js"></script>
+
+<script src="/{{ env('URL_REMOTE', '') }}js/custom.js"></script>
 @stack('scripts')
 @stack('scripts2')
 
