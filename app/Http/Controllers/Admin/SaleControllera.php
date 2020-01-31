@@ -12,6 +12,7 @@ use \Cache;
 use App\Client;
 use App\Paymentmethod;
 use App\Payment;
+use App\Fccomprobante;
 use Carbon\Carbon;
 
 class SaleControllera extends Controller
@@ -174,8 +175,32 @@ class SaleControllera extends Controller
 
         return view('admin.sales.edit_multipagos', ['sale' => $sale, 'sales_user' => $sales_user, 'paymentmethods' => $paymentmethods]);
       }
+      $comprobantes = [];
 
-      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited'), 'sales_user' => $sales_user]);
+      if($sale->client != null){
+        $tipos_comprobante = $sale->client->ivatipo->documentgroups()->get();
+
+        foreach($tipos_comprobante as $tipo){
+          if($tipo->name == 'A'){
+
+              array_push($comprobantes, 'A');
+          }
+          if($tipo->name == 'B'){
+
+              array_push($comprobantes, 'B');
+          }
+          if($tipo->name == 'TZ'){
+              //$comprobantes = array_add($comprobantes,'TZ', ['Ticket']);
+              array_push($comprobantes, 'TZ');
+          }
+
+        }
+      }
+
+
+      //dd($comprobantes);
+
+      return view('admin.sales.edit', ['sale' => $sale, 'id_edited' => $request->get('id_edited'), 'sales_user' => $sales_user, 'comprobantes' => $comprobantes]);
     }
 
     /**
@@ -278,8 +303,6 @@ class SaleControllera extends Controller
 
         $sale->total = $sale->getTotal();
 
-        $sale->created_at = date("Y-m-d H:i:s.v");
-
         $sale->update();
 
         $payment_efectivo->created_at = date("Y-m-d H:i:s.v");
@@ -292,7 +315,116 @@ class SaleControllera extends Controller
 
         $payment_efectivo->save();
 
+        //si se generó todo correctamente
+        if($this->emitir_comprobante($sale)){
+          return redirect()->route('sales.index');
+        }
+
         return redirect()->route('sales.index');
+
+
+    }
+
+    public function confirm_payment_cc(Request $request, $id)
+    {
+        $sale = Sale::find($id);
+
+        $sale->status = 'FINALIZADA';
+
+        //Actualizo el stock de cada producto
+        foreach($sale->saleitems as $item){
+          $stockproduct = $item->saleproduct->stockproduct;
+
+          $stockproduct->stock = $stockproduct->stock - ($item->cantidad * $item->saleproduct->rel_venta_stock);
+
+          $stockproduct->update();
+        }
+
+        $sale->saldo = $sale->client->saldo + $sale->getTotal();
+
+        $payment_efectivo = new Payment();
+
+        $sale->total = $sale->getTotal();
+
+        $sale->update();
+
+        $client = $sale->client;
+        $client->saldo = $client->saldo - $sale->getTotal();
+        $client->update();
+
+        //si se generó todo correctamente
+        if($this->emitir_comprobante($sale)){
+          return redirect()->route('clients.show', $client->id);
+        }
+
+        return redirect()->route('clients.show', $client->id);
+
+
+    }
+
+    public function emitir_comprobante($sale)
+    {
+      if($sale->tipo_comprobante == null){
+
+      }elseif($sale->tipo_comprobante == 'TZ'){
+
+        $comprobante = new Fccomprobante();
+        if($sale->client != null){
+          $comprobante->client_id = $sale->client->id;
+        }
+        $comprobante->tipo = 'FCTZ';
+        $comprobante->sale_id = $sale->id;
+
+        $comprobante->valor = $sale->getTotal();
+
+        //imprimo comprobante en la impresora fiscal
+        if(true){  //si se imprimio correctmente devuelvo el numero de comprobante
+          $comprobante->numero = '0001-00000343';
+          $comprobante->created_at = $sale->created_at;
+          $comprobante->save();
+
+          return true;
+        }
+
+
+      }elseif($sale->tipo_comprobante == 'A'){
+        $comprobante = new Fccomprobante();
+
+        $comprobante->client_id = $sale->client->id;
+
+        $comprobante->tipo = 'FCA';
+        $comprobante->sale_id = $sale->id;
+
+        $comprobante->valor = $sale->getTotal();
+
+        //imprimo comprobante en la impresora fiscal
+        if(true){  //si se imprimio correctmente devuelvo el numero de comprobante
+          $comprobante->numero = '0001-00037464';
+          $comprobante->created_at = $sale->created_at;
+          $comprobante->save();
+
+          return true;
+        }
+
+      }elseif($sale->tipo_comprobante == 'B'){
+        $comprobante = new Fccomprobante();
+
+        $comprobante->client_id = $sale->client->id;
+
+        $comprobante->tipo = 'FCB';
+        $comprobante->sale_id = $sale->id;
+
+        $comprobante->valor = $sale->getTotal();
+
+        //imprimo comprobante en la impresora fiscal
+        if(true){  //si se imprimio correctmente devuelvo el numero de comprobante
+          $comprobante->numero = '0001-0000443043';
+          $comprobante->created_at = $sale->created_at;
+          $comprobante->save();
+
+          return true;
+        }
+      }
     }
 
 
@@ -334,48 +466,13 @@ class SaleControllera extends Controller
 
     }
 
-    public function search_client(Request $request)
-    {
-      if($request->ajax())
-        {
-
-          $output="";
-          $query = trim($request->search);
-          $val = explode(' ', $query );
-          $atr = [];
-          foreach ($val as $q) {
-            array_push($atr, ['name', 'LIKE', '%'.$q.'%'] );
-          };
-          $clients = Client::orderBy('name', 'ASC')
-            ->where($atr)
-            ->get();
-
-          if($clients)
-          {
-            foreach ($clients as $client) {
-              $output.='<tr class="clickable-row">'.
-              '<td>'.$client->id.'</td>'.
-              '<td>'.$client->name.'</td>'.
-              '<td>'.
-              '<button class="btn btn-sm btn-primary" onclick="select_client('.$client->id.')" type="submit" >Seleccionar</button>'.
-
-              '</td>'.
-              '</tr>';
-
-            }
-
-            return Response($output);
-          }
-
-        }
-
-    }
-
     public function update_client(Request $request, $id)
     {
         $sale = Sale::find($id);
 
         $sale->client_id = $request->get('client_id');
+
+        $sale->tipo_comprobante = null;
 
         $sale->update();
 
@@ -401,6 +498,17 @@ class SaleControllera extends Controller
 
         //delete todos los paymentmethod que tenga agregados
         Payment::where('sale_id', $id)->delete();
+
+        $sale->update();
+
+        return redirect()->route('sales.edit', $sale->id);
+    }
+
+    public function set_tipo_comprobante(Request $request, $id)
+    {
+        $sale = Sale::find($id);
+
+        $sale->tipo_comprobante = $request->get('tipo_comprobante');
 
         $sale->update();
 

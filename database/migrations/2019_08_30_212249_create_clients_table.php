@@ -28,7 +28,14 @@ class CreateClientsTable extends Migration
 
           $table->string('comentario', 512)->nullable();
 
+          $table->bigInteger('ivatipo_id')->unsigned();
+
           //$table->timestamps();
+
+          //Relationship
+          $table->foreign('ivatipo_id')->references('id')->on('ivatipos')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

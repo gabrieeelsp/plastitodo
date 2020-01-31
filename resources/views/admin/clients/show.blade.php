@@ -29,8 +29,11 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-            <div class="card-header">
-              <h3 class="card-title" >Ver Cliente</h3>
+            <div class="card-header d-flex justify-content-end">
+              <h3 class="card-title  flex-fill" >Ver Cliente</h3>
+
+              <a href="{{ route('debitnotes.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-success mr-2">Nueva Nota de Débito</a>
+              <a href="{{ route('creditnotes.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-success mr-2">Nueva Nota de Crédito</a>
 
             </div>
             <!-- /.card-header -->
@@ -43,6 +46,7 @@
                   <tr>
                     <th >Fecha</th>
                     <th>Tipo de Movimiento</th>
+                    <th>Comprobante</th>
                     <th width="10px">Crédito</th>
                     <th width="10px">Débito</th>
                     <th width="10px">Saldo</th>
@@ -54,10 +58,56 @@
                   @foreach($rows as $row)
                   <tr>
                     <td >{{ $row->created_at }}</td>
-                    <td >{{ $row->tipo === 1 ? "PAGO" : "VENTA" }}</td>
-                    <td style="text-align: right;">{{ $row->tipo === 1 ? number_format($row->valor, 2) : "" }}</td>
-                    <td style="text-align: right;">{{ $row->tipo === 1 ? "" : number_format($row->valor, 2) }}</td>
-                    <td style="text-align: right;">{{ number_format($row->saldo, 2) }}</td>
+                    <td >
+                      @if($row->tipo === 1)
+                      RECIBO
+                      @elseif($row->tipo === 2)
+                      VENTA
+                      @elseif($row->tipo === 3)
+                      NOTA DE CREDITO
+                      @endif
+                    </td>
+                    <td style="text-align: right;">
+                      @if($row->tipo === 1)
+
+                      @elseif($row->tipo === 2)
+                      @if($sales_only[$row->id]->fccomprobante != null)
+                        {{ $sales_only[$row->id]->fccomprobante->tipo.' - '.$sales_only[$row->id]->fccomprobante->numero  }}
+                      @endif
+                      @elseif($row->tipo === 3)
+                        @if($creditnotes_only[$row->id]->nccomprobante != null)
+                          {{ $creditnotes_only[$row->id]->nccomprobante->tipo.' - '.$creditnotes_only[$row->id]->nccomprobante->numero  }}
+                        @endif
+                      @endif
+                    </td>
+                    <td style="text-align: right;">
+                      @if($row->tipo === 1)
+
+                      @elseif($row->tipo === 2)
+                      {{ number_format($sales_only[$row->id]->total, 2)  }}
+                      @elseif($row->tipo === 3)
+
+                      @endif
+                    </td>
+                    <td style="text-align: right;">
+                      @if($row->tipo === 1)
+                      {{ number_format($payments_only[$row->id]->valor, 2)  }}
+                      @elseif($row->tipo === 2)
+
+                      @elseif($row->tipo === 3)
+                      {{ number_format($creditnotes_only[$row->id]->total, 2)  }}
+                      @endif
+                    </td>
+
+                    <td style="text-align: right;">
+                      @if($row->tipo === 1)
+                      {{ number_format($payments_only[$row->id]->saldo, 2)  }}
+                      @elseif($row->tipo === 2)
+                      {{ number_format($sales_only[$row->id]->saldo, 2)  }}
+                      @elseif($row->tipo === 3)
+                      {{ number_format($creditnotes_only[$row->id]->saldo, 2)  }}
+                      @endif
+                    </td>
                     <td width="10px">
                       <!-- Button trigger modal -->
                       @if($row->tipo == 2)

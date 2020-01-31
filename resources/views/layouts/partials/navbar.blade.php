@@ -13,7 +13,7 @@
     </li>
   </ul>
 
-  
+
 
   <!-- Right navbar links -->
   <ul class="navbar-nav ml-auto">
@@ -116,7 +116,7 @@
         <a class="dropdown-item" href="{{ route('logout') }}"
            onclick="event.preventDefault();
                          document.getElementById('logout-form').submit();">
-            <i class="fas fa-envelope mr-2"></i>
+            <i class="fas fa-power-off"></i>
             {{ __('Logout') }}
         </a>
 

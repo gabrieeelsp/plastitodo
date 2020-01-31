@@ -8,9 +8,12 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
 
+use Illuminate\Support\Collection;
+
 use App\Client;
 use App\Payment;
 use App\Sale;
+use App\Creditnote;
 
 class ClientController extends Controller
 {
@@ -148,13 +151,19 @@ class ClientController extends Controller
       }
     }else{
       //*dateRange => false; $from == $to => false
+      $creditnotes = DB::table("creditnotes")
+        ->where('client_id', $id)
+        ->where('status', 'CONFIRMADO')
+      ->select("creditnotes.id",
+        "creditnotes.created_at"
+      )
+      ->addSelect(DB::raw('3 as tipo'));
+      //dd($creditnotes);
       $payments = DB::table("payments")
         ->where('client_id', $id)
         ->where('status', 'CONFIRMADO')
       ->select("payments.id",
-        "payments.created_at",
-        "payments.valor",
-        "payments.saldo"
+        "payments.created_at"
       )
       ->addSelect(DB::raw('1 as tipo'));
 
@@ -162,34 +171,57 @@ class ClientController extends Controller
         ->where('client_id', $id)
         ->where('status', 'FINALIZADA')
           ->select("sales.id",
-          "sales.created_at",
-          "sales.total as valor",
-          "sales.saldo",
+          "sales.created_at"
           )
           ->addSelect(DB::raw('2 as tipo'))
           ->unionall($payments)
+          ->unionall($creditnotes)
           ->orderBy('created_at', 'DESC')
           ->orderBy('id', 'DESC')
           ->paginate(10);
     }
 
+    //dd($sales);
 
 //--------------------------
+    $items_creditnote = [];
     $items_sale = [];
     $items_payment = [];
     foreach($sales as $item){
         if($item->tipo == 2){
           array_push($items_sale, $item->id);
-        }else{
+        }elseif($item->tipo == 1){
           array_push($items_payment, $item->id);
+        }if($item->tipo == 3){
+          array_push($items_creditnote, $item->id);
         }
 
     }
 
     $sales_only = Sale::whereIn('id', $items_sale)->get();
     $payments_only = Payment::whereIn('id', $items_payment)->get();
+    $creditnotes_only = Creditnote::whereIn('id', $items_creditnote)->get();
 
-    return view('admin.clients.show', ['client' => $client, 'rows' => $sales, 'sales_only' => $sales_only, 'payments_only' => $payments_only, 'daterange' => $request->get('daterange')]);
+
+
+    $sales_collection = new Collection();
+    foreach($sales_only as $sale){
+      $sales_collection->put($sale->id, $sale);
+    }
+
+    $creditnotes_collection = new Collection();
+    foreach($creditnotes_only as $creditnote){
+      $creditnotes_collection->put($creditnote->id, $creditnote);
+    }
+
+    $payments_collection = new Collection();
+    foreach($payments_only as $payments){
+      $payments_collection->put($payments->id, $payments);
+    }
+
+
+
+    return view('admin.clients.show', ['client' => $client, 'rows' => $sales, 'sales_only' => $sales_collection, 'payments_only' => $payments_collection, 'creditnotes_only' => $creditnotes_collection, 'daterange' => $request->get('daterange')]);
   }
 
   /**
@@ -231,5 +263,42 @@ class ClientController extends Controller
   public function destroy($id)
   {
       //
+  }
+
+  public function search_client(Request $request)
+  {
+    if($request->ajax())
+      {
+
+        $output="";
+        $query = trim($request->search);
+        $val = explode(' ', $query );
+        $atr = [];
+        foreach ($val as $q) {
+          array_push($atr, ['name', 'LIKE', '%'.$q.'%'] );
+        };
+        $clients = Client::orderBy('name', 'ASC')
+          ->where($atr)
+          ->get();
+
+        if($clients)
+        {
+          foreach ($clients as $client) {
+            $output.='<tr class="clickable-row">'.
+            '<td>'.$client->id.'</td>'.
+            '<td>'.$client->name.'</td>'.
+            '<td>'.
+            '<button class="btn btn-sm btn-primary" onclick="select_client('.$client->id.')" type="submit" >Seleccionar</button>'.
+
+            '</td>'.
+            '</tr>';
+
+          }
+
+          return Response($output);
+        }
+
+      }
+
   }
 }

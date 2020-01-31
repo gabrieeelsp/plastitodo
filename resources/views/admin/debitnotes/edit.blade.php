@@ -17,20 +17,20 @@
         <div class="col-9">
           <div class="card">
             <div class="card-header d-flex justify-content-end">
-              <h3 class="card-title flex-fill" >Editar Venta</h3>
+              <h3 class="card-title flex-fill" >Editar Note de Débito</h3>
 
-              @foreach($sales_user as $sale_user)
-                @if($sale_user->client != null)
-                  @if($sale_user->id == $sale->id)
-                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-success mr-2">{{ $sale_user->client->name }}</a>
+              @foreach($debitnotes_user as $debitnote_user)
+                @if($debitnote_user->client != null)
+                  @if($debitnote_user->id == $debitnote->id)
+                    <a href="{{ route('debitnotes.edit', $debitnote_user->id) }}" class="btn btn-sm btn-success mr-2">{{ $debitnote_user->client->name }}</a>
                   @else
-                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-outline-success mr-2">{{ $sale_user->client->name }}</a>
+                    <a href="{{ route('debitnotes.edit', $debitnote_user->id) }}" class="btn btn-sm btn-outline-success mr-2">{{ $debitnote_user->client->name }}</a>
                   @endif
                 @else
-                  @if($sale_user->id == $sale->id)
-                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-primary mr-2">Cliente Estándar</a>
+                  @if($debitnote_user->id == $debitnote->id)
+                    <a href="{{ route('debitnotes.edit', $debitnote_user->id) }}" class="btn btn-sm btn-primary mr-2">Cliente Estándar</a>
                   @else
-                    <a href="{{ route('sales.edit', $sale_user->id) }}" class="btn btn-sm btn-outline-primary mr-2">Cliente Estándar</a>
+                    <a href="{{ route('debitnotes.edit', $debitnote_user->id) }}" class="btn btn-sm btn-outline-primary mr-2">Cliente Estándar</a>
                   @endif
                 @endif
               @endforeach
@@ -40,7 +40,7 @@
             <div class="card-body">
               <div class="row">
                 <div class="col-sm-3">
-                  {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
+                  {!! Form::open(['route' => ['debitnotes.debitnoteitems.store', $debitnote->id]]) !!}
 
                     <input id="saleproduct_barcode" name="saleproduct_barcode" type="text" class="form-control" >
 
@@ -51,15 +51,9 @@
 
                     <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#selectSaleProductModal"> &nbsp; &nbsp;<i class="fas fa-cart-plus"></i> &nbsp; &nbsp; </button>
 
-              </div>
-
-
+                </div>
 
               </div>
-
-
-
-
               <table class="table table-striped table-hover table-bordered mt-3">
                 <thead>
                   <tr>
@@ -68,6 +62,7 @@
                     <th width="40px">Desc</th>
                     <th width="40px">P-Desc</th>
                     <th width="40px">Cantidad</th>
+                    <th width="40px">Retornar</th>
                     <th width="40px">Subtotal</th>
                     <th colspan="2">&nbsp;</th>
                   </tr>
@@ -76,7 +71,7 @@
 
                   <!-- {{ $count = 0 }} -->
 
-                  @foreach($sale->saleItems as $item)
+                  @foreach($debitnote->debitnoteitems as $item)
                   @if($id_edited == $item->id)
                   <tr class="table-warning">
                   @else
@@ -88,6 +83,7 @@
                     <td style="text-align: right;">{{ number_format($item->descuento, 2) }}</td>
                     <td style="text-align: right;">{{ number_format($item->getPrecioDescuento(), 2) }}</td>
                     <td style="text-align: right;">{{ number_format($item->cantidad, 2) }}</td>
+                    <td>{{ $item->retornar_stock }}</td>
                     <td style="text-align: right;">{{ number_format($item->getSubTotal(), 2) }}</td>
                     <td width="10px">
                       <!-- Button trigger modal -->
@@ -96,7 +92,7 @@
                       </button>
                     </td>
                     <td width="10px">
-                      {{ Form::open(['route' => ['sales.saleitems.destroy', $sale->id, $item->id], 'method' => 'DELETE']) }}
+                      {{ Form::open(['route' => ['debitnotes.debitnoteitems.destroy', $debitnote->id, $item->id], 'method' => 'DELETE']) }}
                         <button class="btn btn-sm btn-danger"><i class="far fa-trash-alt"></i></button>
                       {{ Form::close() }}
 
@@ -114,30 +110,24 @@
 
 
 
-                  @if($sale->client != null)
+                  @if($debitnote->client != null)
 
-                    {{ Form::open(['route' => ['sales.confirm_payment_cc', $sale->id], 'method' => 'POST']) }}
-                    <button class="btn btn-sm btn-primary mr-3"
-                    @if($sale->getTotal() == 0) disabled @endif
-                    >Pago CC</i></button>
+                    {{ Form::open(['route' => ['debitnotes.destroy', $debitnote->id], 'method' => 'DELETE']) }}
+                    <button class="btn btn-sm btn-primary mr-3">Finalizar   </i></button>
                     {{ Form::close() }}
                   @endif
 
-                  {{ Form::open(['route' => ['sales.set_multipagos', $sale->id], 'method' => 'post']) }}
-                  <button class="btn btn-sm btn-primary mr-3"
-                  @if($sale->getTotal() == 0) disabled @endif
-                  >Pago MULTIPLE   </i></button>
-                  {{ Form::close() }}
+
 
                   <!-- Button trigger modal -->
                   <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal" data-target="#medotoPagoEfectivoModal"
-                    @if($sale->getTotal() == 0) disabled @endif
+                    @if($debitnote->getTotal() == 0) disabled @endif
                     >
                     Pago EFECTIVO
                   </button>
 
 
-                    {{ Form::open(['route' => ['sales.destroy', $sale->id], 'method' => 'DELETE']) }}
+                    {{ Form::open(['route' => ['debitnotes.destroy', $debitnote->id], 'method' => 'DELETE']) }}
                     <button class="btn btn-sm btn-danger">Cancelar   <i class="far fa-trash-alt"></i></button>
                     {{ Form::close() }}
                 </div>
@@ -161,7 +151,7 @@
 
 
               <li class="list-group-item bg-dark">
-                <input type="text" class="form-control form-disable text-sm-right total-value-edit text-success" value="$ {{ number_format($sale->getTotal(), 2) }}" disabled>
+                <input type="text" class="form-control form-disable text-sm-right total-value-edit text-success" value="$ {{ number_format($debitnote->getTotal(), 2) }}" disabled>
               </li>
 
 
@@ -175,17 +165,17 @@
               <div class="row">
 
                 <div class="col-10 d-flex justify-content-start">
-                  @if($sale->client != null)
-                    <input type="text" name="nombre_cliente" class="form-control form-disable" value="{{ $sale->client->name }}" disabled >
+                  @if($debitnote->client != null)
+                    <input type="text" name="nombre_cliente" class="form-control form-disable" value="{{ $debitnote->client->name }}" disabled >
                   @else
                     <input type="text" name="nombre_cliente" class="form-control mx-sm-3 form-disable" value="Cliente Estándar" disabled >
                   @endif
                 </div>
 
                 <div class="col-2 d-flex align-items-center justify-content-end">
-                  @if($sale->client != null)
+                  @if($debitnote->client != null)
 
-                    <a href="{{ route('clients.show', $sale->client->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="far fa-user"></i></a>
+                    <a href="{{ route('clients.show', $debitnote->client->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="far fa-user"></i></a>
                   @else
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#selectClientModal"><i class="fas fa-search"></i></button>
                   @endif
@@ -196,19 +186,19 @@
 
                 <div class="col-12 d-flex">
 
-                  {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
+                  {{ Form::open(['route' => ['debitnotes.set_tipo_comprobante', $debitnote->id], 'method' => 'POST']) }}
                   {{ Form::hidden('tipo_comprobante', '0') }}
-                  @if($sale->tipo_comprobante == null)
+                  @if($debitnote->tipo_comprobante == null)
                   <button class="btn btn-sm btn-success">--------</i></button>
                   @else
                   <button class="btn btn-sm btn-outline-success">--------</i></button>
                   @endif
                   {{ Form::close() }}
 
-                  @if(in_array('TZ', $comprobantes) || $sale->client == null)
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
+                  @if(in_array('TZ', $comprobantes) || $debitnote->client == null)
+                    {{ Form::open(['route' => ['debitnotes.set_tipo_comprobante', $debitnote->id], 'method' => 'POST']) }}
                     {{ Form::hidden('tipo_comprobante', 'TZ') }}
-                    @if($sale->tipo_comprobante == 'TZ')
+                    @if($debitnote->tipo_comprobante == 'TZ')
                     <button class="btn btn-sm btn-success">Ticket</i></button>
                     @else
                     <button class="btn btn-sm btn-outline-success">Ticket</i></button>
@@ -218,9 +208,9 @@
 
 
                   @if(in_array('A', $comprobantes))
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
+                    {{ Form::open(['route' => ['debitnotes.set_tipo_comprobante', $debitnote->id], 'method' => 'POST']) }}
                     {{ Form::hidden('tipo_comprobante', 'A') }}
-                    @if($sale->tipo_comprobante == 'A')
+                    @if($debitnote->tipo_comprobante == 'A')
                     <button class="btn btn-sm btn-success">Factura A</i></button>
                     @else
                     <button class="btn btn-sm btn-outline-success">Factura A</i></button>
@@ -230,9 +220,9 @@
 
 
                   @if(in_array('B', $comprobantes))
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
+                    {{ Form::open(['route' => ['debitnotes.set_tipo_comprobante', $debitnote->id], 'method' => 'POST']) }}
                     {{ Form::hidden('tipo_comprobante', 'B') }}
-                    @if($sale->tipo_comprobante == 'B')
+                    @if($debitnote->tipo_comprobante == 'B')
                     <button class="btn btn-sm btn-success">Factura B</i></button>
                     @else
                     <button class="btn btn-sm btn-outline-success">Factura B</i></button>
@@ -312,11 +302,11 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
+      {!! Form::open(['route' => ['debitnotes.debitnoteitems.store', $debitnote->id]]) !!}
       <div class="modal-body">
 
 
-        {{ Form::hidden('sale_id', $sale->id) }}
+        {{ Form::hidden('debitnote_id', $debitnote->id) }}
         {{ Form::hidden('saleproduct_id', 0, ['id' => 'saleproduct_id']) }}
           <div class="form-group">
             <label for="cantidad">Cantidad</label>
@@ -333,53 +323,18 @@
   </div>
 </div>
 
-<!-- Select Client Modal -->
-<div class="modal fade" id="selectClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel2">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
 
-        <input type="text" class="form-controller" id="search_client" name="search"></input>
-
-        </div>
-        {!! Form::model($sale, ['route' => ['sales.update_client', $sale->id], 'method' => 'POST']) !!}
-        {{ Form::hidden('client_id', null, ['id' => 'id_client_input']) }}
-        <table class="table table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th></th>
-            </tr>
-        </thead>
-        <tbody id="tbody-select_client">
-
-        </tbody>
-      </table>
-      {!! Form::close() !!}
-      </div>
-
-    </div>
-  </div>
-</div>
 
 
 
 <!-- {{ $count = 0 }} -->
-@foreach($sale->saleitems as $item)
+@foreach($debitnote->debitnoteitems as $item)
 <!-- Editar SaleProducto Modal -->
 <div class="modal fade" id="editarModalN{{ $count }}" tabindex="-1" role="dialog" aria-labelledby="editarModalN" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-max-width" role="document">
     <div class="modal-content">
 
-      {!! Form::model($item, ['route' => ['sales.saleitems.update', $sale->id, $item->id], 'method' => 'PUT']) !!}
+      {!! Form::model($item, ['route' => ['debitnotes.debitnoteitems.update', $debitnote->id, $item->id], 'method' => 'PUT']) !!}
 
       <div class="modal-body">
 
@@ -444,18 +399,18 @@
         </button>
       </div>
       <div class="modal-body">
-        {!! Form::model($sale, ['route' => ['sales.confirm_payment_efectivo', $sale->id], 'method' => 'PUT']) !!}
+        {!! Form::model($debitnote, ['route' => ['debitnotes.guardar', $debitnote->id], 'method' => 'POST']) !!}
 
         <div class="form-group row">
           <label for="total_efectivo" class="col-sm-3 col-form-label text-sm-right">TOTAL</label>
           <div class="col-sm-9">
-            <input type="text" readonly class="form-control text-sm-right" id="total_efectivo" value="{{ number_format($sale->getTotal(), 2) }}" >
+            <input type="text" readonly class="form-control text-sm-right" id="total_efectivo" value="{{ number_format($debitnote->getTotal(), 2) }}" >
           </div>
         </div>
         <div class="form-group row">
           <label for="entrega_efectivo" class="col-sm-3 col-form-label text-sm-right">Entrega</label>
           <div class="col-sm-9">
-            <input type="text" class="form-control text-sm-right" id="entrega_efectivo" value="{{ number_format($sale->getTotal(), 2) }}"
+            <input type="text" class="form-control text-sm-right" id="entrega_efectivo" value="{{ number_format($debitnote->getTotal(), 2) }}"
 
             >
           </div>
@@ -499,8 +454,8 @@
       $.ajax({
         type : 'get',
         url : '{{URL::to('sales_search_item')}}',
-        @if($sale->client != null)
-        data:{'search':$value, 'tipo':'{{ $sale->client->tipo }}'},
+        @if($debitnote->client != null)
+        data:{'search':$value, 'tipo':'{{ $debitnote->client->tipo }}'},
         @else
         data:{'search':$value, 'tipo':'Minorista'},
         @endif
@@ -588,7 +543,7 @@
 </script>
 
 <!-- {{ $count = 0 }} -->
-@foreach($sale->saleitems as $item)
+@foreach($debitnote->debitnoteitems as $item)
 <script type="text/javascript">
   $('#editarModalN{{ $count }}').on('shown.bs.modal', function(){
 

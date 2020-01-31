@@ -30,6 +30,12 @@
   </div>
 </div>
 <div class="form-group row">
+  {{ Form::label('iva', 'Iva', ['class' => 'col-sm-2 col-form-label text-sm-right']) }}
+  <div class="col-sm-10">
+      {{ Form::number('iva', null, ['class' => 'form-control text-right', 'step' => '1']) }}
+  </div>
+</div>
+<div class="form-group row">
   {{ Form::label('stock_deposito', 'Stock Depósito', ['class' => 'col-sm-2 col-form-label text-sm-right']) }}
   <div class="col-sm-10">
       {{ Form::number('stock_deposito', null, ['class' => 'form-control text-right', 'step' => 'any']) }}

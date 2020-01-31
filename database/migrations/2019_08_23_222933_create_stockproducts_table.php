@@ -26,6 +26,8 @@ class CreateStockproductsTable extends Migration
           $table->decimal('costo', 8, 4)->default(0);
           $table->decimal('stock', 8, 2)->default(0);
 
+          $table->decimal('iva', 4,2)->default(21);
+
           $table->decimal('stock_deposito', 8, 2)->default(0);
 
           //$table->timestamps();

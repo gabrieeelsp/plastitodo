@@ -8,7 +8,7 @@
 
 
 
-<title>Live Search</title>
+<title>Live Searssch</title>
 
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
@@ -18,94 +18,28 @@
 
 <body>
 
-<div class="container">
 
-<div class="row">
+  {!! Form::open(['route' => 'WebserviceController.enviarPeticionAdd', 'method' => 'GET']) !!}
+  <div class="form-group row">
+    {{ Form::label('name', 'Nombre', ['class' => 'col-sm-2 col-form-label text-sm-right']) }}
+    <div class="col-sm-10">
+        {{ Form::text('name', null, ['class' => 'form-control', 'id' => 'name']) }}
+    </div>
+  </div>
 
-<div class="panel panel-default">
+  <div class="form-group row">
+    {{ Form::label('slug', 'URL', ['class' => 'col-sm-2 col-form-label text-sm-right']) }}
+    <div class="col-sm-10">
+        {{ Form::text('slug', null, ['class' => 'form-control', 'id' => 'slug']) }}
+    </div>
+  </div>
 
-<div class="panel-heading">
-
-<h3>Products info </h3>
-
-</div>
-
-<div class="panel-body">
-
-<div class="form-group">
-
-<input type="text" class="form-controller" id="search" name="search"></input>
-
-</div>
-
-<table class="table table-bordered table-hover">
-
-<thead>
-
-<tr>
-
-<th>ID</th>
-
-<th>Product Name</th>
-
-<th>Precio</th>
-
-<th>Stock</th>
-
-</tr>
-
-</thead>
-
-
-
-<tbody>
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script type="text/javascript">
-
-$('#search').on('keyup',function(){
-
-$value=$(this).val();
-
-$.ajax({
-
-type : 'get',
-
-url : '{{URL::to('search')}}',
-
-data:{'search':$value},
-
-success:function(data){
-
-$('tbody').html(data);
-
-}
-
-});
-
-
-
-})
-
-</script>
-
-<script type="text/javascript">
-
-$.ajaxSetup({ headers: { 'csrftoken' : '{{ csrf_token() }}' } });
-
-</script>
-
+  <div class="form-group row">
+    <div class="col-sm-10 offset-sm-2">
+        {{ Form::submit('Guardar', ['class' => 'btn btn-sm btn-primary']) }}
+    </div>
+  </div>
+  {!! Form::close() !!}
 </body>
 
 </html>

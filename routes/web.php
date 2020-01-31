@@ -11,6 +11,20 @@
 |
 */
 
+Route::get('/enviarPeticion', [
+  'uses' => 'WebserviceController@enviarPeticion',
+  'as' => 'WebserviceController.enviarPeticion'
+]);
+Route::get('/enviarPeticionAdd', [
+  'uses' => 'WebserviceController@enviarPeticionOtro',
+  'as' => 'WebserviceController.enviarPeticionAdd'
+]);
+
+
+
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -41,9 +55,62 @@ Route::resource('categories', 'Admin\CategoryController');
 Route::resource('proveedors', 'Admin\ProveedorController');
 Route::resource('proveedors.purchaseproducts', 'Admin\PurchaseproductController');
 
+Route::get('search_client','Admin\ClientController@search_client');
 Route::resource('clients', 'Admin\ClientController');
 
+//-- DEBITNOTE BEGIN ---------------------------------
+  Route::post('debitnotes/{id}/set_tipo_comprobante', [
+    'uses' => 'Admin\DebitnoteController@set_tipo_comprobante',
+    'as' => 'debitnotes.set_tipo_comprobante'
+  ]);
+  Route::post('debitnotes/{id}/update_client', [
+    'uses' => 'Admin\DebitnoteController@update_client',
+    'as' => 'debitnotes.update_client'
+  ]);
+  Route::post('debitnotes/{id}/guardar', [
+    'uses' => 'Admin\DebitnoteController@guardar',
+    'as' => 'debitnotes.guardar'
+  ]);
+  Route::put('debitnotes/{id}/confirm_payment_efectivo', [
+    'uses' => 'Admin\DebitnoteController@confirm_payment_efectivo',
+    'as' => 'debitnotes.confirm_payment_efectivo'
+  ]);
+
+
+  Route::get('debitnotes_search_item','Admin\SaleControllera@search');
+  Route::resource('debitnotes', 'Admin\DebitnoteController');
+  Route::resource('debitnotes.debitnoteitems', 'Admin\DebitnoteController');
+//-- DEBITNOTE END ---------------------------------
+
+//-- CREDITNOTE BEGIN ---------------------------------
+  Route::post('creditnotes/{id}/set_tipo_comprobante', [
+    'uses' => 'Admin\CreditnoteController@set_tipo_comprobante',
+    'as' => 'creditnotes.set_tipo_comprobante'
+  ]);
+  Route::post('creditnotes/{id}/update_client', [
+    'uses' => 'Admin\CreditnoteController@update_client',
+    'as' => 'creditnotes.update_client'
+  ]);
+  Route::post('creditnotes/{id}/guardar', [
+    'uses' => 'Admin\CreditnoteController@guardar',
+    'as' => 'creditnotes.guardar'
+  ]);
+  Route::put('creditnotes/{id}/confirm_payment_efectivo', [
+    'uses' => 'Admin\CreditnoteController@confirm_payment_efectivo',
+    'as' => 'creditnotes.confirm_payment_efectivo'
+  ]);
+
+
+  Route::get('creditnotes_search_item','Admin\SaleControllera@search');
+  Route::resource('creditnotes', 'Admin\CreditnoteController');
+  Route::resource('creditnotes.creditnoteitems', 'Admin\CreditnoteitemController');
+//-- CREDITNOTE END ---------------------------------
+
 //-- SALE BEGIN ---------------------------------
+  Route::post('sales/{id}/set_tipo_comprobante', [
+    'uses' => 'Admin\SaleControllera@set_tipo_comprobante',
+    'as' => 'sales.set_tipo_comprobante'
+  ]);
   Route::post('sales/{id}/update_client', [
     'uses' => 'Admin\SaleControllera@update_client',
     'as' => 'sales.update_client'
@@ -56,6 +123,10 @@ Route::resource('clients', 'Admin\ClientController');
     'uses' => 'Admin\SaleControllera@confirm_payment_efectivo',
     'as' => 'sales.confirm_payment_efectivo'
   ]);
+  Route::post('sales/{id}/confirm_payment_cc', [
+    'uses' => 'Admin\SaleControllera@confirm_payment_cc',
+    'as' => 'sales.confirm_payment_cc'
+  ]);
   Route::post('sales/{id}/set_multipagos', [
     'uses' => 'Admin\SaleControllera@set_multipagos',
     'as' => 'sales.set_multipagos'
@@ -64,7 +135,7 @@ Route::resource('clients', 'Admin\ClientController');
     'uses' => 'Admin\SaleControllera@cancel_multipagos',
     'as' => 'sales.cancel_multipagos'
   ]);
-  Route::get('sales_search_client','Admin\SaleControllera@search_client');
+
   Route::get('sales_search_item','Admin\SaleControllera@search');
   Route::resource('sales', 'Admin\SaleControllera');
   Route::resource('sales.saleitems', 'Admin\SaleitemControllera');

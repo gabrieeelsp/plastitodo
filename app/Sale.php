@@ -17,6 +17,11 @@ class Sale extends Model
     return $this->belongsTo(User::class);
   }
 
+  public function fccomprobante()
+  {
+    return $this->hasOne(Fccomprobante::class);
+  }
+
   public function saleitems()
   {
     return $this->hasMany(Saleitem::class);

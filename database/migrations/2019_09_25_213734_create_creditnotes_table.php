@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalesTable extends Migration
+class CreateCreditnotesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,20 +13,22 @@ class CreateSalesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales', function (Blueprint $table) {
+        Schema::create('creditnotes', function (Blueprint $table) {
             $table->bigIncrements('id');
+
             $table->bigInteger('client_id')->unsigned()->nullable();
+
             $table->bigInteger('user_id')->unsigned();
 
-
-
-            $table->dateTime('created_at');
-
-            $table->decimal('total', 10, 4)->default(0);
+            $table->enum('status', ['EDITANDO', 'CONFIRMADO']);
 
             $table->decimal('saldo', 10, 4)->default(0);
 
-            $table->enum('status', ['EDITANDO','FINALIZADA','COBRANDO']);
+            $table->decimal('total', 10, 4)->default(0);
+
+            $table->dateTime('created_at');
+
+            $table->string('comentario', 512)->nullable();
 
             $table->enum('tipo_comprobante', ['A','B','TZ'])->nullable();
 
@@ -36,12 +38,9 @@ class CreateSalesTable extends Migration
             $table->foreign('client_id')->references('id')->on('clients')
               ->onDelete('cascade')
               ->onUpdate('cascade');
-
             $table->foreign('user_id')->references('id')->on('users')
               ->onDelete('cascade')
               ->onUpdate('cascade');
-
-
         });
     }
 
@@ -52,6 +51,6 @@ class CreateSalesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales');
+        Schema::dropIfExists('creditnotes');
     }
 }

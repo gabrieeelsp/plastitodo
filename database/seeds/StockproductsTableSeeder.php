@@ -16,7 +16,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bandejas-plasticas-101-work-unidad',
         'category_id' => '1',
         'costo' => 10,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -24,7 +25,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bandejas-plasticas-102-work-unidad',
         'category_id' => '1',
         'costo' => 10,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -32,7 +34,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bandejas-plasticas-103-work-unidad',
         'category_id' => '1',
         'costo' => 10,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -40,7 +43,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bandejas-plasticas-105-work-unidad',
         'category_id' => '1',
         'costo' => 10,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -48,7 +52,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bandejas-plasticas-107-work-unidad',
         'category_id' => '1',
         'costo' => 10,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -56,7 +61,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'colorante-en-pasta-rojo-fleibor-unidad',
         'category_id' => '2',
         'costo' => 35,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -72,7 +78,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'colorante-en-pasta-verde-fleibor-unidad',
         'category_id' => '2',
         'costo' => 35,
-        'stock' => 100
+        'stock' => 100,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -80,7 +87,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'dulce-de-leche-eureka-10-00kg-unidad',
         'category_id' => '3',
         'costo' => 830,
-        'stock' => 20
+        'stock' => 20,
+        'iva' => 21
       ]);
 
       App\Stockproduct::create([
@@ -88,7 +96,8 @@ class StockproductsTableSeeder extends Seeder
         'slug' => 'bolsa-de-polipropileno-10x15-unidad',
         'category_id' => '4',
         'costo' => 0.15,
-        'stock' => 20000
+        'stock' => 20000,
+        'iva' => 21
       ]);
     }
 }

@@ -39,36 +39,20 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row">
-                <div class="col-sm-3">
-                  {!! Form::open(['route' => ['sales.saleitems.store', $sale->id]]) !!}
-
-                    <input id="saleproduct_barcode" name="saleproduct_barcode" type="text" class="form-control" >
-
-                  {!! Form::close() !!}
-                </div>
-
-                <div class="col-sm-1 d-flex align-items-center">
-
-                    <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal" data-target="#selectSaleProductModal"> &nbsp; &nbsp;<i class="fas fa-cart-plus"></i> &nbsp; &nbsp; </button>
-
-              </div>
+                {!! Form::open(['route' => 'payments.store', 'class' => 'row']) !!}
+                  @include('admin.sales.partials.form_payment')
+                {!! Form::close() !!}
 
 
 
               </div>
 
-
-
-
-              <table class="table table-striped table-hover table-bordered mt-3">
+              <table class="table table-striped table-hover  mt-3">
                 <thead>
                   <tr>
-                    <th>Producto</th>
-                    <th width="40px">Precio</th>
-                    <th width="40px">Desc</th>
-                    <th width="40px">P-Desc</th>
-                    <th width="40px">Cantidad</th>
-                    <th width="40px">Subtotal</th>
+                    <th>Método de Pago</th>
+                    <th width="40px">Valor</th>
+
                     <th colspan="2">&nbsp;</th>
                   </tr>
                 </thead>
@@ -76,27 +60,53 @@
 
                   <!-- {{ $count = 0 }} -->
 
-                  @foreach($sale->saleItems as $item)
-                  @if($id_edited == $item->id)
-                  <tr class="table-warning">
-                  @else
                   <tr>
-                  @endif
-
-                    <td>{{ $item->saleproduct->name }}</td>
-                    <td style="text-align: right;">{{ number_format($item->precio, 2) }}</td>
-                    <td style="text-align: right;">{{ number_format($item->descuento, 2) }}</td>
-                    <td style="text-align: right;">{{ number_format($item->getPrecioDescuento(), 2) }}</td>
-                    <td style="text-align: right;">{{ number_format($item->cantidad, 2) }}</td>
-                    <td style="text-align: right;">{{ number_format($item->getSubTotal(), 2) }}</td>
-                    <td width="10px">
-                      <!-- Button trigger modal -->
-                      <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editarModalN{{ $count }}">
-                        <i class="far fa-edit"></i>
-                      </button>
+                    <td>
+                      Total de la VENTA
                     </td>
+                    <td style="text-align: right;">
+                      {{ number_format($sale->getTotal(), 2) }}
+                    </td>
+                    <td colspan="2">
+
+                    </td>
+                  </tr>
+                  @foreach($sale->payments as $payment)
+                  <tr>
+                    <td>
+                      Recargo ({{ $payment->paymentmethod->name  }} %{{ number_format($payment->paymentmethod->recargo, 2) }})
+                    </td>
+                    <td style="text-align: right;">
+                      {{ number_format($payment->recargo, 2) }}
+                    </td>
+                    <td colspan="1">
+
+                    </td>
+                  </tr>
+                  @endforeach
+                  <tr>
+                    <td>
+                      TOTAL con Recargo
+                    </td>
+                    <td style="text-align: right; border-top: 3px solid black;">
+                      {{ number_format($sale->getTotalConRecargo(), 2) }}
+                    </td>
+                    <td colspan="1">
+
+                    </td>
+                  </tr>
+
+                  @foreach($sale->payments as $payment)
+
+                  <tr>
+
+                    <td>{{ $payment->paymentmethod->name }}</td>
+                    <td style="text-align: right;">{{ number_format($payment->getPagoConRecargo(), 2) }}</td>
+
+
                     <td width="10px">
-                      {{ Form::open(['route' => ['sales.saleitems.destroy', $sale->id, $item->id], 'method' => 'DELETE']) }}
+                      {{ Form::open(['route' => ['payments.destroy', $payment->id], 'method' => 'DELETE']) }}
+                        {{ Form::hidden('sale_id', $sale->id) }}
                         <button class="btn btn-sm btn-danger"><i class="far fa-trash-alt"></i></button>
                       {{ Form::close() }}
 
@@ -105,39 +115,42 @@
                   </tr>
                   <!-- {{ $count = $count + 1 }} -->
                   @endforeach
+
+                  <td>
+                    Resto
+                  </td>
+                  <td style="text-align: right; " >
+                    {{ number_format($sale->getTotal() - $sale->getTotalPayments(), 2) }}
+                  </td>
+                  <td colspan="1">
+
+                  </td>
+
+                </tr>
                 </tbody>
               </table>
+
+
+
 
 
               <div class="row">
                 <div class="col-12 d-flex justify-content-end mt-3">
 
 
-
                   @if($sale->client != null)
 
-                    {{ Form::open(['route' => ['sales.confirm_payment_cc', $sale->id], 'method' => 'POST']) }}
-                    <button class="btn btn-sm btn-primary mr-3"
-                    @if($sale->getTotal() == 0) disabled @endif
-                    >Pago CC</i></button>
+                    {{ Form::open(['route' => ['sales.destroy', $sale->id], 'method' => 'DELETE']) }}
+                    <button class="btn btn-sm btn-primary mr-3">Finalizar   </i></button>
                     {{ Form::close() }}
                   @endif
 
-                  {{ Form::open(['route' => ['sales.set_multipagos', $sale->id], 'method' => 'post']) }}
-                  <button class="btn btn-sm btn-primary mr-3"
-                  @if($sale->getTotal() == 0) disabled @endif
-                  >Pago MULTIPLE   </i></button>
+                  {{ Form::open(['route' => ['sales.confirm_payment_multiple', $sale->id], 'method' => 'post']) }}
+                  <button class="btn btn-sm btn-danger">CONFIRMAR PAGO   <i class="far fa-trash-alt"></i></button>
                   {{ Form::close() }}
 
-                  <!-- Button trigger modal -->
-                  <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal" data-target="#medotoPagoEfectivoModal"
-                    @if($sale->getTotal() == 0) disabled @endif
-                    >
-                    Pago EFECTIVO
-                  </button>
 
-
-                    {{ Form::open(['route' => ['sales.destroy', $sale->id], 'method' => 'DELETE']) }}
+                    {{ Form::open(['route' => ['sales.cancel_multipagos', $sale->id], 'method' => 'post']) }}
                     <button class="btn btn-sm btn-danger">Cancelar   <i class="far fa-trash-alt"></i></button>
                     {{ Form::close() }}
                 </div>
@@ -173,8 +186,7 @@
             </div>
             <div class="card-body">
               <div class="row">
-
-                <div class="col-10 d-flex justify-content-start">
+                <div class="col-10">
                   @if($sale->client != null)
                     <input type="text" name="nombre_cliente" class="form-control form-disable" value="{{ $sale->client->name }}" disabled >
                   @else
@@ -184,69 +196,12 @@
 
                 <div class="col-2 d-flex align-items-center justify-content-end">
                   @if($sale->client != null)
-
                     <a href="{{ route('clients.show', $sale->client->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="far fa-user"></i></a>
                   @else
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#selectClientModal"><i class="fas fa-search"></i></button>
                   @endif
                 </div>
 
-              </div>
-              <div class="row">
-
-                <div class="col-12 d-flex">
-
-                  {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
-                  {{ Form::hidden('tipo_comprobante', '0') }}
-                  @if($sale->tipo_comprobante == null)
-                  <button class="btn btn-sm btn-success">--------</i></button>
-                  @else
-                  <button class="btn btn-sm btn-outline-success">--------</i></button>
-                  @endif
-                  {{ Form::close() }}
-
-                  @if(in_array('TZ', $comprobantes) || $sale->client == null)
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
-                    {{ Form::hidden('tipo_comprobante', 'TZ') }}
-                    @if($sale->tipo_comprobante == 'TZ')
-                    <button class="btn btn-sm btn-success">Ticket</i></button>
-                    @else
-                    <button class="btn btn-sm btn-outline-success">Ticket</i></button>
-                    @endif
-                    {{ Form::close() }}
-                  @endif
-
-
-                  @if(in_array('A', $comprobantes))
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
-                    {{ Form::hidden('tipo_comprobante', 'A') }}
-                    @if($sale->tipo_comprobante == 'A')
-                    <button class="btn btn-sm btn-success">Factura A</i></button>
-                    @else
-                    <button class="btn btn-sm btn-outline-success">Factura A</i></button>
-                    @endif
-                    {{ Form::close() }}
-                  @endif
-
-
-                  @if(in_array('B', $comprobantes))
-                    {{ Form::open(['route' => ['sales.set_tipo_comprobante', $sale->id], 'method' => 'POST']) }}
-                    {{ Form::hidden('tipo_comprobante', 'B') }}
-                    @if($sale->tipo_comprobante == 'B')
-                    <button class="btn btn-sm btn-success">Factura B</i></button>
-                    @else
-                    <button class="btn btn-sm btn-outline-success">Factura B</i></button>
-                    @endif
-                    {{ Form::close() }}
-                  @endif
-
-
-
-
-
-
-
-                </div>
               </div>
             </div>
           </div>
@@ -399,7 +354,7 @@
             <tr>
               <td>{{ $item->saleproduct->name }}</td>
               <td>
-                <input style="text-align: right; width: 100px; " type="text" id="precio{{ $count }}" name="precio" value="{{ number_format($item->precio, 2) }}" step="any">
+                <input style="text-align: right; width: 100px; " type="number" id="precio{{ $count }}" name="precio" value="{{ number_format($item->precio, 4) }}" step="any">
               </td>
 
               <td>
@@ -408,7 +363,7 @@
 
               <td style="text-align: right;"><span id="precio_descuento{{ $count }}">{{ number_format($item->getPrecioDescuento(), 4) }}</span></td>
               <td>
-                <input style="text-align: right; width: 100px; " type="text" id="cantidad{{ $count }}" name="cantidad" value="{{ number_format($item->cantidad, 2) }}" step="any">
+                <input style="text-align: right; width: 100px; " type="number" id="cantidad{{ $count }}" name="cantidad" value="{{ number_format($item->cantidad, 2) }}" step="any">
               </td>
               <td style="text-align: right;"><span id="subtotal{{ $count }}">{{ number_format($item->getSubTotal(), 2) }}</span></td>
               <td width="10px">
@@ -455,7 +410,7 @@
         <div class="form-group row">
           <label for="entrega_efectivo" class="col-sm-3 col-form-label text-sm-right">Entrega</label>
           <div class="col-sm-9">
-            <input type="text" class="form-control text-sm-right" id="entrega_efectivo" value="{{ number_format($sale->getTotal(), 2) }}"
+            <input type="number" class="form-control text-sm-right" id="entrega_efectivo" value="{{ number_format($sale->getTotal(), 2) }}"
 
             >
           </div>
@@ -550,7 +505,7 @@
     if($value != ''){
       $.ajax({
         type : 'get',
-        url : '{{URL::to('search_client')}}',
+        url : '{{URL::to('sales_search_client')}}',
         data:{'search':$value},
         success:function(data){
           $('#tbody-select_client').html(data);
@@ -601,17 +556,9 @@
     setTimeout(function() {$('tr').removeClass("table-warning"); }, 3000);
 
     $("#cantidad{{ $count }}").keyup(function() {
-
-      var precio = $("#precio{{ $count }}").val().replace(',','');
-      precio = Number(precio);
-
-      var cantidad = $("#cantidad{{ $count }}").val().replace(',','');
-      cantidad = Number(cantidad);
-
-      var descuento = $("#descuento{{ $count }}").val().replace(',','');
-      descuento = Number(descuento);
-
-
+      var precio = $("#precio{{ $count }}").val();
+      var descuento = $("#descuento{{ $count }}").val();
+      var cantidad = $("#cantidad{{ $count }}").val();
 
       var precio_descuento = precio * ( 1 - descuento / 100);
 
@@ -619,14 +566,9 @@
     });
 
     $("#precio{{ $count }}").keyup(function() {
-      var precio = $("#precio{{ $count }}").val().replace(',','');
-      precio = Number(precio);
-
-      var cantidad = $("#cantidad{{ $count }}").val().replace(',','');
-      cantidad = Number(cantidad);
-
-      var descuento = $("#descuento{{ $count }}").val().replace(',','');
-      descuento = Number(descuento);
+      var precio = $("#precio{{ $count }}").val();
+      var descuento = $("#descuento{{ $count }}").val();
+      var cantidad = $("#cantidad{{ $count }}").val();
 
       var precio_descuento = precio * ( 1 - descuento / 100);
 
@@ -636,14 +578,9 @@
     });
 
     $("#descuento{{ $count }}").keyup(function() {
-      var precio = $("#precio{{ $count }}").val().replace(',','');
-      precio = Number(precio);
-
-      var cantidad = $("#cantidad{{ $count }}").val().replace(',','');
-      cantidad = Number(cantidad);
-
-      var descuento = $("#descuento{{ $count }}").val().replace(',','');
-      descuento = Number(descuento);
+      var precio = $("#precio{{ $count }}").val();
+      var descuento = $("#descuento{{ $count }}").val();
+      var cantidad = $("#cantidad{{ $count }}").val();
 
       var precio_descuento = precio * ( 1 - descuento / 100);
 
@@ -668,7 +605,7 @@
 
     var total_efectivo = $("#total_efectivo").val().replace(',','');
 
-    total_efectivo = Number(total_efectivo);
+    Number(total_efectivo)
 
 
     var entrega_efectivo = $("#entrega_efectivo").val();

@@ -15,14 +15,16 @@ class ClientsTableSeeder extends Seeder
         'name' => 'Roberto Pereyra',
         'slug' => 'roberto-pereyra',
         'tipo' => 'Minorista',
-        'saldo' => 0
+        'saldo' => 0,
+        'ivatipo_id' => '1'
       ]);
 
       App\Client::create([
         'name' => 'Ivan Issadora',
         'slug' => 'ivan-issadora',
         'tipo' => 'Mayorista',
-        'saldo' => 0
+        'saldo' => 0,
+        'ivatipo_id' => '3'
       ]);
     }
 }
